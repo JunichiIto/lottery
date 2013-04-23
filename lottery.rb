@@ -219,19 +219,39 @@ describe Lottery do
   end
 
   context 'when same member added' do
-    let(:size) { 3 }
-    before do
-      lottery.add("John", 10)
-      lottery.add("Tom", 20)
-      lottery.add("Tom", 30)
+    context 'when 1 for 2(1)' do
+      let(:size) { 1 }
+      before do
+        lottery.add("Tom", 20)
+        lottery.add("Tom", 30)
+      end
+
+      specify { expect(lottery.winners.length).to eq 1 }
+
+      it 'returns unique winners every time' do
+        10.times do
+          winners = lottery.winners
+          expect(winners.length).to eq winners.uniq.length
+        end
+      end
     end
 
-    specify { expect(lottery.winners.length).to eq 2 }
+    context 'when 3 for 4(3)' do
+      let(:size) { 3 }
+      before do
+        lottery.add("John", 10)
+        lottery.add("Tom", 20)
+        lottery.add("Tom", 30)
+        lottery.add("Woz", 10)
+      end
 
-    it 'returns unique winners every time' do
-      10.times do
-        winners = lottery.winners
-        expect(winners.length).to eq winners.uniq.length
+      specify { expect(lottery.winners.length).to eq 3 }
+
+      it 'returns unique winners every time' do
+        10.times do
+          winners = lottery.winners
+          expect(winners.length).to eq winners.uniq.length
+        end
       end
     end
   end
