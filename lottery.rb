@@ -1,10 +1,12 @@
 class Lottery
   def initialize(size)
+    raise ArgumentError, 'size must be larger than or equal to 0' unless size >= 0
     @size = size
     @member_table = {}
   end
 
   def add(member, weight)
+    raise ArgumentError, 'member must be unique' unless @member_table[member].nil?
     raise ArgumentError, 'weight must be larger than 0' unless weight > 0
     @member_table[member] = weight
   end
@@ -192,13 +194,6 @@ describe Lottery do
     end
   end
 
-  context 'when weight is less than 1' do
-    let(:size) { 1 }
-    specify do
-      expect{lottery.add("John", 0)}.to raise_error(ArgumentError)
-    end
-  end
-
   context 'when 0 for 1' do
     let(:size) { 0 }
     before do
@@ -218,40 +213,28 @@ describe Lottery do
     specify { expect(lottery.winners.length).to eq 0 }
   end
 
-  context 'when same member added' do
-    context 'when 1 for 2(1)' do
-      let(:size) { 1 }
-      before do
-        lottery.add("Tom", 20)
-        lottery.add("Tom", 30)
-      end
-
-      specify { expect(lottery.winners.length).to eq 1 }
-
-      it 'returns unique winners every time' do
-        10.times do
-          winners = lottery.winners
-          expect(winners.length).to eq winners.uniq.length
-        end
+  describe "[EXCEPTIONAL]" do
+    context 'when size is less than 0' do
+      let(:size) { -1 }
+      specify do
+        expect{lottery}.to raise_error(ArgumentError)
       end
     end
 
-    context 'when 3 for 4(3)' do
-      let(:size) { 3 }
-      before do
-        lottery.add("John", 10)
-        lottery.add("Tom", 20)
-        lottery.add("Tom", 30)
-        lottery.add("Woz", 10)
+    context 'when weight is less than 1' do
+      let(:size) { 1 }
+      specify do
+        expect{lottery.add("John", 0)}.to raise_error(ArgumentError)
       end
+    end
 
-      specify { expect(lottery.winners.length).to eq 3 }
-
-      it 'returns unique winners every time' do
-        10.times do
-          winners = lottery.winners
-          expect(winners.length).to eq winners.uniq.length
-        end
+    context 'when same member added' do
+      let(:size) { 2 }
+      before do
+        lottery.add("Tom", 20)
+      end
+      specify do
+        expect{lottery.add("Tom", 20)}.to raise_error(ArgumentError)
       end
     end
   end
